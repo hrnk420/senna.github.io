@@ -23,39 +23,58 @@
     <h2>QRコード</h2>
     <img src="/qr" alt="QR Code" />
 
-    <script>
-        const socket = io();
+<script>
+    const socket = io();
 
-        socket.on('new_memo', function(data) {
-            const listItem = document.createElement('li');
-            listItem.id = `memo-${data.id}`;  // Set the ID for the list item
-            listItem.textContent = data.content;
+    // ユーザーが通知を許可するか確認
+    if (Notification.permission !== "granted") {
+        Notification.requestPermission();
+    }
 
-            const deleteButton = document.createElement('button');
-            deleteButton.textContent = '削除';
-            deleteButton.onclick = function() {
-                deleteMemo(data.id);  // Call delete function
-            };
+    socket.on('new_memo', function(data) {
+        const listItem = document.createElement('li');
+        listItem.id = `memo-${data.id}`;  // Set the ID for the list item
+        listItem.textContent = data.content;
 
-            listItem.appendChild(deleteButton);
-            document.getElementById('memo-list').appendChild(listItem);
-        });
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = '削除';
+        deleteButton.onclick = function() {
+            deleteMemo(data.id);  // Call delete function
+        };
 
-        socket.on('delete_memo', function(data) {
-            const memoItem = document.getElementById(`memo-${data.id}`);
-            if (memoItem) {
-                memoItem.remove();  // Remove the memo item from the list
-            }
-        });
+        listItem.appendChild(deleteButton);
+        document.getElementById('memo-list').appendChild(listItem);
 
-        function deleteMemo(id) {
-            fetch(`/delete/${id}`, { method: 'POST' })
-                .then(response => {
-                    if (response.ok) {
-                        console.log('Memo deleted');
-                    }
-                });
+        // 通知を表示
+        if (Notification.permission === "granted") {
+            new Notification("新しいメモが追加されました", {
+                body: data.content,
+            });
         }
-    </script>
+    });
+
+    socket.on('delete_memo', function(data) {
+        const memoItem = document.getElementById(`memo-${data.id}`);
+        if (memoItem) {
+            memoItem.remove();  // Remove the memo item from the list
+        }
+
+        // 通知を表示
+        if (Notification.permission === "granted") {
+            new Notification("メモが削除されました", {
+                body: `ID ${data.id} のメモが削除されました`,
+            });
+        }
+    });
+
+    function deleteMemo(id) {
+        fetch(`/delete/${id}`, { method: 'POST' })
+            .then(response => {
+                if (response.ok) {
+                    console.log('Memo deleted');
+                }
+            });
+    }
+</script>
 </body>
 </html>
