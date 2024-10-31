@@ -14,49 +14,36 @@
     <ul id="memo-list">
         {% for memo in memos %}
             <li>
-                {{ memo[1] }} 
-                <button onclick="deleteMemo({{ memo[0] }})">削除</button>
-                <img src="{{ url_for('qr_code', data=memo[1]) }}" alt="QR Code" style="width: 50px; height: 50px;">
+                {{ memo[1] }}
+                <form action="/delete/{{ memo[0] }}" method="POST" style="display:inline;">
+                    <button type="submit">削除</button>
+                </form>
             </li>
         {% endfor %}
     </ul>
-    
+
+    <h2>QRコード</h2>
+    <img src="/qr" alt="QR Code" />
+
     <script>
         const socket = io();
 
         socket.on('new_memo', function(data) {
             const listItem = document.createElement('li');
             listItem.textContent = data.content;
+            const deleteForm = document.createElement('form');
+            deleteForm.action = `/delete/${data.id}`;
+            deleteForm.method = 'POST';
+            deleteForm.style.display = 'inline';
 
-            // QRコードを生成するためのimgタグ
-            const qrCode = document.createElement('img');
-            qrCode.src = `/qr_code/${data.content}`;
-            qrCode.alt = "QR Code";
-            qrCode.style.width = "50px";
-            qrCode.style.height = "50px";
-            listItem.appendChild(qrCode);
-
-            // 削除ボタンを追加
             const deleteButton = document.createElement('button');
-            deleteButton.textContent = "削除";
-            deleteButton.onclick = function() {
-                deleteMemo(data.id); // メモIDを削除関数に渡す
-            };
-            listItem.appendChild(deleteButton);
+            deleteButton.type = 'submit';
+            deleteButton.textContent = '削除';
+            deleteForm.appendChild(deleteButton);
 
+            listItem.appendChild(deleteForm);
             document.getElementById('memo-list').appendChild(listItem);
         });
-
-        function deleteMemo(memoId) {
-            fetch(`/delete/${memoId}`, {
-                method: 'POST'
-            })
-            .then(response => {
-                if (response.ok) {
-                    location.reload(); // 成功したらページをリロード
-                }
-            });
-        }
     </script>
 </body>
 </html>
