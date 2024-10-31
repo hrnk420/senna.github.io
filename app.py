@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, send_file
-import flask_socketio import SocketIO
+from flask_socketio import SocketIO
 import sqlite3
 import qrcode
 import os
