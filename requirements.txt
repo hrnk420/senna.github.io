@@ -28,3 +28,4 @@ tzdata==2024.2
 urllib3==2.2.3
 waitress==3.0.1
 Werkzeug==3.0.6
+Flask-SQLAlchemy
