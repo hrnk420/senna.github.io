@@ -31,9 +31,11 @@ def add_memo():
     # メモを追加
     content = request.form['content']
     with sqlite3.connect('database.db') as conn:
-        conn.execute('INSERT INTO memos (content) VALUES (?)', (content,))
+        cur = conn.cursor()
+        cur.execute('INSERT INTO memos (content) VALUES (?)', (content,))
         conn.commit()
-    socketio.emit('new_memo', {'content': content})
+        memo_id = cur.lastrowid  # Get the last inserted ID
+    socketio.emit('new_memo', {'id': memo_id, 'content': content})
     return redirect('/')
 
 @app.route('/delete/<int:id>', methods=['POST'])
@@ -42,7 +44,8 @@ def delete_memo(id):
     with sqlite3.connect('database.db') as conn:
         conn.execute('DELETE FROM memos WHERE id = ?', (id,))
         conn.commit()
-    return redirect('/')
+    socketio.emit('delete_memo', {'id': id})  # Emit delete event
+    return '', 204  # No content response
 
 @app.route('/qr')
 def qr_code():

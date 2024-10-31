@@ -13,11 +13,9 @@
     </form>
     <ul id="memo-list">
         {% for memo in memos %}
-            <li>
+            <li id="memo-{{ memo[0] }}">
                 {{ memo[1] }}
-                <form action="/delete/{{ memo[0] }}" method="POST" style="display:inline;">
-                    <button type="submit">削除</button>
-                </form>
+                <button onclick="deleteMemo({{ memo[0] }})">削除</button>
             </li>
         {% endfor %}
     </ul>
@@ -30,20 +28,34 @@
 
         socket.on('new_memo', function(data) {
             const listItem = document.createElement('li');
+            listItem.id = `memo-${data.id}`;  // Set the ID for the list item
             listItem.textContent = data.content;
-            const deleteForm = document.createElement('form');
-            deleteForm.action = `/delete/${data.id}`;
-            deleteForm.method = 'POST';
-            deleteForm.style.display = 'inline';
 
             const deleteButton = document.createElement('button');
-            deleteButton.type = 'submit';
             deleteButton.textContent = '削除';
-            deleteForm.appendChild(deleteButton);
+            deleteButton.onclick = function() {
+                deleteMemo(data.id);  // Call delete function
+            };
 
-            listItem.appendChild(deleteForm);
+            listItem.appendChild(deleteButton);
             document.getElementById('memo-list').appendChild(listItem);
         });
+
+        socket.on('delete_memo', function(data) {
+            const memoItem = document.getElementById(`memo-${data.id}`);
+            if (memoItem) {
+                memoItem.remove();  // Remove the memo item from the list
+            }
+        });
+
+        function deleteMemo(id) {
+            fetch(`/delete/${id}`, { method: 'POST' })
+                .then(response => {
+                    if (response.ok) {
+                        console.log('Memo deleted');
+                    }
+                });
+        }
     </script>
 </body>
 </html>
