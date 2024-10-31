@@ -53,5 +53,6 @@ def qr_code():
     return send_file(qr_path, mimetype='image/png')
 
 if __name__ == '__main__':
-    init_db()  # データベースの初期化
-    app.run(host='0.0.0.0', port=5000, debug=True)  # アプリを実行
+    init_db()
+    port = int(os.environ.get('PORT', 5000))  # 環境変数からポートを取得
+    app.run(host='0.0.0.0', port=port, debug=True)  # 環境変数のポートにバインド
