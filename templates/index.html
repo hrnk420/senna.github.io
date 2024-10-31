@@ -1,27 +1,30 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>メモアプリ</title>
+    <title>Memo App</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
 </head>
 <body>
-    <h1>メモ一覧</h1>
+    <h1>Memo App</h1>
     <form action="/add" method="POST">
-        <input type="text" name="content" placeholder="メモを入力">
+        <input type="text" name="content" placeholder="メモを追加" required>
         <button type="submit">追加</button>
     </form>
-
-    <ul>
+    <ul id="memo-list">
         {% for memo in memos %}
-            <li>
-                {{ memo[1] }}
-                <form action="/delete/{{ memo[0] }}" method="POST" style="display:inline;">
-                    <button type="submit">削除</button>
-                </form>
-            </li>
+            <li>{{ memo[1] }}</li>
         {% endfor %}
     </ul>
+    
+    <script>
+        const socket = io();
 
-    <a href="/qr">QRコードを見る</a>
+        socket.on('new_memo', function(data) {
+            const listItem = document.createElement('li');
+            listItem.textContent = data.content;
+            document.getElementById('memo-list').appendChild(listItem);
+        });
+    </script>
 </body>
 </html>

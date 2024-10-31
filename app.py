@@ -1,9 +1,11 @@
 from flask import Flask, render_template, request, redirect, send_file
+import flask_socketio import SocketIO
 import sqlite3
 import qrcode
 import os
 
 app = Flask(__name__)
+socketio = SocketIO(app)
 
 def init_db():
     # staticディレクトリを作成
@@ -31,6 +33,7 @@ def add_memo():
     with sqlite3.connect('database.db') as conn:
         conn.execute('INSERT INTO memos (content) VALUES (?)', (content,))
         conn.commit()
+    socketio.emit('new_memo', {'content': content})
     return redirect('/')
 
 @app.route('/delete/<int:id>', methods=['POST'])
@@ -54,5 +57,4 @@ def qr_code():
 
 if __name__ == '__main__':
     init_db()
-    port = int(os.environ.get('PORT', 5000))  # 環境変数からポートを取得
-    app.run(host='0.0.0.0', port=port, debug=True)  # 環境変数のポートにバインド
+    socketio.run(app, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=True)  # SocketIOでアプリを実行
