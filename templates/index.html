@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>メモアプリ</title>
+</head>
+<body>
+    <h1>メモ一覧</h1>
+    <form action="/add" method="POST">
+        <input type="text" name="content" placeholder="メモを入力">
+        <button type="submit">追加</button>
+    </form>
+
+    <ul>
+        {% for memo in memos %}
+            <li>
+                {{ memo[1] }}
+                <form action="/delete/{{ memo[0] }}" method="POST" style="display:inline;">
+                    <button type="submit">削除</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <a href="/qr">QRコードを見る</a>
+</body>
+</html>
