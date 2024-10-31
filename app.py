@@ -44,8 +44,10 @@ def delete_memo(id):
     with sqlite3.connect('database.db') as conn:
         conn.execute('DELETE FROM memos WHERE id = ?', (id,))
         conn.commit()
-    socketio.emit('delete_memo', {'id': id})  # Emit delete event
-    return '', 204  # No content response
+
+    # Socket.IOで削除通知を送信
+    socketio.emit('delete_memo', {'id': id})
+    return redirect('/')
 
 @app.route('/qr')
 def qr_code():
